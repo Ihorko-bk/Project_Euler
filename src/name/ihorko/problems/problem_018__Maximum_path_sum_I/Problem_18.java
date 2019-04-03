@@ -1,6 +1,6 @@
 package name.ihorko.problems.problem_018__Maximum_path_sum_I;
 
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is 23.
@@ -34,7 +34,7 @@ import java.util.Arrays;
  * However, Problem 67, is the same challenge with a triangle containing one-hundred rows;
  * it cannot be solved by brute force, and requires a clever method! ;o)
  *
- * Answer:
+ * Answer: 1074
  */
 
 public class Problem_18 {
@@ -53,12 +53,56 @@ public class Problem_18 {
                 "91 71 52 38 17 14 91 43 58 50 27 29 48\n" +
               "63 66 04 68 89 53 67 30 73 16 69 87 40 31\n" +
             "04 62 98 27 23 09 70 98 73 93 38 53 60 04 23";
+        static int[][] pyramid = getPyramid();
+        static ArrayList<Branch> branches = new ArrayList<>();
+
     public static void main(String[] args) {
 
         showPyramid();
+        System.out.println(getFirstNotZeroElementIndex(pyramid[0]));
+
+        Branch firstBranch = new Branch(pyramid.length);
+        int j = getFirstNotZeroElementIndex(pyramid[0]);
+        firstBranch.addElement(pyramid[0][j]);
+        m(firstBranch, 1, j);
+        for (Branch b : branches) {
+            System.out.println(b);
+        }
+        System.out.println(branches.size());
+        Collections.sort(branches);
+        System.out.println(branches.get(0));
+        System.out.println(branches.get(branches.size()-1));
 
 
     }
+    static int getFirstNotZeroElementIndex(int[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != 0) return i;
+        }
+        return -1;
+    }
+    static void m(Branch branch, int i, int j) {
+        if (i < pyramid.length) {
+            Branch anotherBranch = new Branch(branch);
+            branch.addElement(pyramid[i][j-1]);
+            m(branch, i+1, j-1);
+            anotherBranch.addElement(pyramid[i][j+1]);
+            m(anotherBranch, i+1, j+1);
+        } else {
+            branch.calcSum();
+            branches.add(branch);
+        }
+    }
+//    static List<Branch> getBranches(int[][] pyramid) {
+//        ArrayList<Branch> branches = new ArrayList<>();
+//        int elementsQuantity = pyramid.length;
+//        int branchesQuantity = (int) Math.pow(2, pyramid.length-1);
+//        for (int i = 0; i <; i++) {
+//
+//        }
+//
+//        return branches;
+//    }
     static int[][] getArrayFromString(String string) {
         String[] lines = string.split("\n");
         String[] strNumbers;
@@ -94,8 +138,10 @@ public class Problem_18 {
         }
         return pyramid;
     }
+    static int[][] getPyramid() {
+        return getPyramidFromArray(getArrayFromString(string));
+    }
     static void showPyramid() {
-        int[][] pyramid = getPyramidFromArray(getArrayFromString(string));
         for (int[] ii :pyramid) {
             for (int i : ii) {
                 System.out.printf("%02d  " , i);
@@ -103,23 +149,39 @@ public class Problem_18 {
             System.out.println();
         }
     }
+}
+class Branch implements Comparable {
+    int[] elements;
+    int sum;
+    int elementCounter;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public Branch(Branch branch) {
+        this(branch.elements);
+        this.elementCounter = branch.elementCounter;
+    }
+    public Branch(int elementsQuantity) {
+        elements = new int[elementsQuantity];
+    }
+    public Branch(int[] elements) {
+        this.elements = elements;
+    }
+    public void addElement(int element) {
+        if (elementCounter <= elements.length) elements[elementCounter++] = element;
+    }
+    public void calcSum() {
+        for (int i : elements) {
+            sum += i;
+        }
+    }
+    @Override
+    public String toString() {
+        return "Branch{" +
+                "elements=" + Arrays.toString(elements) +
+                ", sum=" + sum +
+                '}';
+    }
+    @Override
+    public int compareTo(Object o) {
+        return Integer.compare(this.sum, ((Branch)o).sum);
+    }
 }
